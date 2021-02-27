@@ -35,6 +35,7 @@ All libraries used in this crawler are in the standard Python language.
 ## Code Examples
 Search for a list of keywords and show the results to the screen:
 `python main_json.py -i ./sample/input_1.json`
+
 Search for a list of keywords and save the results in a file:
 `python main_json.py -i ./sample/input_1.json -o ./output/`
 

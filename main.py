@@ -41,6 +41,8 @@ def read_json_file(json_file_path: str)->dict:
     Returns:
         dict: data read from json file and returned in json format
     """
+    if not json_file_path:
+        return {}
     data = {}
     try:
         with open(json_file_path) as f:
@@ -81,6 +83,8 @@ def check_json_data_structure(json_data:dict)->bool:
     Returns:
         bool: True if all fields exist, False if not
     """
+    if not json_data:
+        return False
     fields = ['keywords', 'proxies', 'type']
     return all(list(map(lambda x: x in json_data.keys(), fields)))
 
