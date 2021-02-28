@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-desc="""This script allows the user to start the process of crawler the GitHub webpage
-after search for a list of keywords in a json file.
+desc="""This script allows the user to start the process of crawling the GitHub webpage
+after searching for a list of keywords in a json file.
 
 In this json file there are also a list of proxies to use during the request part
 and a string with the type of search to filter the results.
 
 The final motivation is to return a list of values with the results of the first page
-Only one mandatory parameter are needed:
+Only one mandatory parameter is needed:
 * input_path: the path to the json file with the data the user wants to search in the website.
 To save the result in a json file you should add:
 * output_path: the path to the folder where to save the results.
@@ -119,7 +119,7 @@ def check_github_crawler_values(github_crawler):
 
     return status, message
 
-def save_result(output_path: str, result: dict)->tuple:
+def save_result(output_path: str, result: dict, verbose=False)->tuple:
     """[summary] this function save the result in a file 
     or show it in the screen 
 
@@ -132,28 +132,34 @@ def save_result(output_path: str, result: dict)->tuple:
         [str]: links in a json format if all is ok, a message with the error if not 
     """
     if output_path:
+        if not os.path.exists(output_path):
+            return False, 'Output folder does not exists'
         filename = "{}.json".format(datetime.now().strftime("%Y_%m_%d-%I:%M:%S_%p"))
-        try:
-            print(result)
-            with open(os.path.join(output_path, filename), 'w') as f:
+        output_file = os.path.join(output_path, filename)
+        try:            
+            with open(output_file, 'w') as f:
                 json.dump(result, f, indent=4)
             f.close()
-        except Exception:
-            return False, 'There was a problem saving the output'
+            message = 'Results saved in the file: {}\n'.format(output_file)
+            logging.info(message)
+            sys.stdout.write("[INFO] {}\n".format(message))
+        except Exception as e:
+            return False, 'There was a problem saving the output: {}'.format(e)
     else:
-        sys.stdout.write(json.dumps(result, indent=4))
+        sys.stdout.write("[INFO] {}\n".format(json.dumps(result, indent=4)))
     
     return True, json.dumps(result)
 
 def launch_crawler_process(github_crawler)->tuple:
-    """[summary] this function 
+    """[summary] this function join the different process needed
+    to prepare the crawler and extract the data
 
     Args:
-        github_crawler ([type]): [description]
+        github_crawler ([obj]): GitHub Crawler object
 
     Returns:
         [bool]: the result of launch the crawler after all the steps
-        [str]: links in a json format if all is ok, a message with the error if not 
+        [list]: links in a json format if all is ok, a message with the error if not 
     """
     selected_proxy = github_crawler.get_random_proxy()
     selected_url = github_crawler.get_url_by_type()
@@ -172,19 +178,20 @@ def start_process(input_path: str, output_path: str, verbose=False)->tuple:
     * Read the JSON file
     * Check all the data have a correct format
     * Create the crawler object and check the 
-    * 
+    * Launch the process of extract information
+    * Save the result
 
     Args:
-        input_path (str): [description]
-        output_path (str): [description]
-        verbose (bool, optional): [description]. Defaults to False.
+        input_path (str): path to the input file
+        output_path (str): path to the output file
+        verbose (bool, optional): show more information on screen. Defaults to False.
 
     Returns:
         tuple: [description]
     """
     json_data = read_json_file(input_path)
     if verbose:
-        print(json_data)
+        sys.stdout.write("[INFO] {}\n".format(json_data))
     
     status, message = check_json_data_content(json_data)
     if not status:
@@ -193,9 +200,12 @@ def start_process(input_path: str, output_path: str, verbose=False)->tuple:
     github_crawler = GitHub(json_data['keywords'], json_data['proxies'], json_data['type'])
     
     if verbose:    
-        print(github_crawler.keywords)
-        print(github_crawler.proxies)
-        print(github_crawler.search_type)
+        sys.stdout.write('------------------\n')
+        sys.stdout.write('GitHub attributes\n')
+        sys.stdout.write('------------------\n')
+        sys.stdout.write("keywords: {}\n".format(github_crawler.keywords))
+        sys.stdout.write("proxies: {}\n".format(github_crawler.proxies))
+        sys.stdout.write("search_type: {}\n".format(github_crawler.search_type))
     
     status, message = check_github_crawler_values(github_crawler)
     if not status:
@@ -206,7 +216,7 @@ def start_process(input_path: str, output_path: str, verbose=False)->tuple:
     if not status:
         return False, result
     
-    status, result = save_result(output_path, result)
+    status, result = save_result(output_path, result, verbose)
     if not status:
         return False, result
 
@@ -232,6 +242,7 @@ def main():
     
     logging.info('------------------------')
     logging.info('Starting the crawler...')
+    sys.stdout.write('[INFO] Starting the crawler...\n')
 
     if not os.path.exists(o.input_path):
         logging.error('JSON file not found')
@@ -239,11 +250,14 @@ def main():
     status, result = start_process(o.input_path, o.output_path, o.verbose)
     if not status:
         logging.warning(result)
+        sys.stdout.write("[ERROR] {}\n".format(result))
         return
     
     logging.info(result)
     logging.info('Crawler ended OK')
     logging.info('------------------------')
+    sys.stdout.write('[INFO] Crawler ended OK\n')
+
 
 if __name__=='__main__':
     t0 = datetime.now()

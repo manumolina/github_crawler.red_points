@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-desc="""To-Do
-
-CHANGELOG:
-0.1.0
-- 
-"""
-epilog="""Author:
+"""Author:
 manu.molinam@gmail.com
 
 Barcelona, 26/02/2021

@@ -9,6 +9,10 @@ class GithubTest(unittest.TestCase):
     """
    
     def test_get_url_by_type(self):
+        """[summary] 
+        Func: get_url_by_type
+        Desc: include the keywords and the search type to the github template url
+        """
         for i, test in enumerate(vars2test['test_github_inputs']):
             github_test = GitHub(test['keywords'], 
                 test['proxies'], 
@@ -17,6 +21,13 @@ class GithubTest(unittest.TestCase):
             self.assertTrue(result == vars2test['test_get_url_by_type'][i]['output'])
          
     def test_parser_get_links(self):
+        """[summary] 
+        Func: parser_get_links
+        Desc: recives a lxml tree object with the content of the webpage and search:
+            * <div> tags with a specific class
+            * <a> tags inside the previous divs
+            Returns a list with links found in that tag
+        """
         for i, test in enumerate(vars2test['test_github_inputs']):
             github_test = GitHub(test['keywords'], 
                 test['proxies'], 
@@ -30,6 +41,11 @@ class GithubTest(unittest.TestCase):
             self.assertTrue(len(result) >= vars2test['test_parser_get_links'][i]['output'])
     
     def test_parser_get_content(self):
+        """[summary] 
+        Func: parser_get_content
+        Desc: get the commplete webpage from the url selected, 
+            convert it to html and parse into string
+        """
         for i, test in enumerate(vars2test['test_github_inputs']):
             github_test = GitHub(test['keywords'], 
                 test['proxies'], 

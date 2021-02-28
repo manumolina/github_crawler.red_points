@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-desc="""To-Do
-
-CHANGELOG:
-0.1.0
-- 
-"""
 epilog="""Author:
 manu.molinam@gmail.com
 
@@ -26,8 +20,10 @@ class GitHub(Crawler):
 
     Attributes
     ----------
-    keywords : str
-        list of keywords to be searched as a query string 
+    url : str
+        url used as a template in case the link is a relative path 
+    query_template: str
+        query url used as a template to include keywords and search type
 
     Methods
     -------
@@ -36,7 +32,7 @@ class GitHub(Crawler):
     
     parser_get_links
         recives a lxml tree object with the content of the webpage and search
-        and eturns a list with the links found
+        and returns a list with the links found
 
     parser_get_content
         get the commplete webpage from the url selected, convert it to html 
@@ -44,8 +40,8 @@ class GitHub(Crawler):
     """
     def __init__(self, keywords, proxies, search_type, page=1):
         Crawler.__init__(self, keywords, proxies, search_type, page)
-        self.url = "https://github.com{}"
-        self.template = "https://github.com/search?q={}&type={}"
+        self.url_template = "https://github.com{}"
+        self.query_template = "https://github.com/search?q={}&type={}"
 
     def get_url_by_type(self):
         """[summary] this function include the keywords and the search type
@@ -57,7 +53,7 @@ class GitHub(Crawler):
         if not self.keywords:
             return ""
         
-        return self.template.format(self.keywords, self.search_type)
+        return self.query_template.format(self.keywords, self.search_type)
 
     
     def parser_get_links(self, tree):
@@ -80,7 +76,7 @@ class GitHub(Crawler):
         # Get the url from the ref
         links = [link.get('href', '') for link in refs]
         # Return a list that only ends with .com.br
-        return [{'url': self.url.format(l) if l.startswith('/') else l}  for l in links]
+        return [{'url': self.url_template.format(l) if l.startswith('/') else l}  for l in links]
 
     def parser_get_content(self, url, proxy, use_proxy=True):
         """[summary] this function get the commplete webpage from the url selected,
